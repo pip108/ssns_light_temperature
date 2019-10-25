@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = hello-world
+CONTIKI_PROJECT = ssns_light_temperature
 MODULES += arch/dev/bme280
 
 all: $(CONTIKI_PROJECT)
