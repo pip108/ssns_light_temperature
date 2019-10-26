@@ -14,7 +14,8 @@ export class DetailsComponent implements OnInit {
     constructor(private router: Router, private route: ActivatedRoute, private backend: BackendService) {}
 
     public node$ = this.route.paramMap.pipe(switchMap(params => {
-        return this.backend.getNode(params.get('i'));
+        const i = Number.parseInt(params.get('i'));
+        return this.backend.getNode(i);
     }));
 
     public ngOnInit(): void {

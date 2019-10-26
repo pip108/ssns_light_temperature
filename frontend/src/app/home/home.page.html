@@ -20,10 +20,12 @@
                 <p>
                   <ion-list>
                     <ion-item>
-                      <ion-icon name="thermometer"></ion-icon> {{ node.temp[node.temp.length - 1].value }}
+                      <ion-icon name="thermometer"></ion-icon>
+                      <span *ngIf="node.temp.length > 0">{{ node.temp[0].value | number:'1.0-1' }} °C</span>
                     </ion-item>
                     <ion-item>
-                        <ion-icon name="sunny"></ion-icon> {{ node.light[node.light.length - 1].value }}
+                        <ion-icon name="sunny"></ion-icon>
+                        <span *ngIf="node.light.length > 0">{{ node.light[0].value | number:'1.0-1' }} lux</span>
                       </ion-item>
                   </ion-list>
                 </p>
