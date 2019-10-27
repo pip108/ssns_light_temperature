@@ -32,4 +32,8 @@ export class DetailsComponent implements OnInit, OnDestroy {
             this.updatesSubscription.unsubscribe();
         }
     }
+
+    public async saveChanges() {
+        this.node = await this.backend.updateNode(this.node).toPromise();;
+    }
 }

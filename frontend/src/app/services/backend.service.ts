@@ -29,6 +29,10 @@ export class BackendService {
         return this.http.get<Node>(`http://localhost:3333/node/${id}`);
     }
 
+    public updateNode(node: Node): Observable<Node> {
+        return this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node);
+    }
+
     private handleWs(r: { msg: string, data: any }): void {
         console.log('hmm', r);
         switch (r.msg) {

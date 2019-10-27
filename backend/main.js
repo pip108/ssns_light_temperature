@@ -12,6 +12,7 @@ const api_port = 3333;
 import models from './db';
 
 const PORT = 5678;
+const INIT_TIMER = 5;
 const db_url = 'mongodb://192.168.1.140/ssns_lt';
 
 mongoose.connect(db_url, { useNewUrlParser: true, useUnifiedTopology: true }).then(async () => {
@@ -31,7 +32,7 @@ server.on('message', async (msg, rinfo) => {
     console.log(`server got: ${msg} from ${rinfo.address} port ${rinfo.port}`);
     let node = await models.Node.findOne({ addr: rinfo.address });
     if (!node) {
-        node = new models.Node({ addr: rinfo.address });
+        node = new models.Node({ addr: rinfo.address, timer: INIT_TIMER });
     }
     const status = JSON.parse(msg);
 
@@ -47,8 +48,13 @@ server.on('message', async (msg, rinfo) => {
     node.light.push({ value: light, timestamp: new Date() });
     await node.save();
 
+    setNodeTimer(rinfo.address, INIT_TIMER);
     sendToAllWs(await generate_nodes_payload());
 });
+
+function setNodeTimer(addr, value) {
+    server.send('set_timer ' + value, PORT, addr);
+}
 
 server.on('listening', () => {
     const address = server.address();
@@ -61,12 +67,6 @@ function sendToAllWs(payload) {
     const clients = expressWs.getWss('/').clients;
     clients.forEach(client => client.send(JSON.stringify(payload)));
 }
-
-
-app.post('/set_timer', async (req, res) => {
-    server.send("set_timer " + req.body.timer, req.body.timer);
-});
-
 
 async function generate_nodes_payload() {
     const nodes = await models.Node.find({},
@@ -82,10 +82,23 @@ async function generate_nodes_payload() {
 
 app.get('/node/:id', async (req, res) => {
     const node = await models.Node.findOne({ _id: req.params.id }, {
-        light: { $slice: -3 },
-        temp: { $slice: -3 }
+        light: { $slice: -15 },
+        temp: { $slice: -15 }
     }).sort({ 'temp.timestamp': -1});
     res.send(node);
+});
+
+app.post('/node/:id', async(req, res) => {
+    const node = await models.Node.findOne({ _id: req.params.id }, {
+        light: { $slice: -15 },
+        temp: { $slice: -15 }
+    }, {});
+    if (req.body.timer != node.timer) {
+        setNodeTimer(node.addr, req.body.timer);
+    }
+    node.name = req.body.name;
+    node.timer = req.body.timer;
+    node.save();
 });
 
 

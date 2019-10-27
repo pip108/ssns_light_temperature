@@ -10,9 +10,33 @@
     <div class="ion-padding">
         <ion-grid>
             <ion-row>
-                <ion-col size="6" offset="3">
-                    <h1>{{ node.addr }}</h1>
-
+                <ion-col size="3" offset="3">
+                    <ion-item>
+                        <ion-label>Node IPv6 Address</ion-label>
+                        <ion-input [(ngModel)]="node.addr" disabled></ion-input>
+                    </ion-item>
+                </ion-col>
+                <ion-col size="3">
+                    <ion-item>
+                        <ion-label>Name</ion-label>
+                        <ion-input [(ngModel)]="node.name"></ion-input>
+                    </ion-item>
+                </ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col size="3" offset="3">
+                    <ion-item>
+                        <ion-label>Timer</ion-label>
+                        <ion-input [(ngModel)]="node.timer"></ion-input>
+                    </ion-item>
+                </ion-col>
+                <ion-col size="3">
+                    <ion-button (click)="saveChanges()">Apply changes</ion-button>
+                </ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col>
+                    <hr />
                 </ion-col>
             </ion-row>
             <ion-row>
@@ -31,7 +55,8 @@
                 </ion-col>
                 <ion-col size="3">
                     <ion-list>
-                        <ion-list-header>Light (lux) <ion-icon name="sunny"></ion-icon></ion-list-header>
+                        <ion-list-header>Light (lux) <ion-icon name="sunny"></ion-icon>
+                        </ion-list-header>
                         <ion-item *ngFor="let light of node.light">
                             <ion-label>
                                 <h2 style="font-weight: bold;">{{ light.value | number:'1.0-1' }}</h2>

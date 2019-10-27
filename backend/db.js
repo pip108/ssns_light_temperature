@@ -20,6 +20,9 @@ const nodeSchema = new mongoose.Schema({
     name: {
         type: String
     },
+    timer: {
+        type: Number
+    },
     light: [sensorSchema],
     temp: [sensorSchema]
 });
