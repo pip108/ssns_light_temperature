@@ -12,11 +12,12 @@
       <ion-row>
         <ion-col size="6" offset="3">
           <ion-list>
-            <ion-item class="node-item" *ngFor="let node of nodes; let i = index" button [routerLink]="['/node', i]">
+            <ion-item class="node-item" *ngFor="let node of nodes" button [routerLink]="['/node', node._id]">
                 <ion-icon class="huge-icon" name="cube"></ion-icon>
               <ion-label>
                 <h2>{{ node.name || node.addr }}</h2>
                 <h3 *ngIf="node.name">{{ node.addr }}</h3>
+
                 <p>
                   <ion-list>
                     <ion-item>
