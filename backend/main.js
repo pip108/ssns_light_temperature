@@ -4,10 +4,24 @@ const express = require('express');
 var cors = require('cors')
 const app = express();
 const expressWs = require('express-ws')(app);
+const mongoose = require('mongoose');
 app.use(cors());
 const api_port = 3333;
 
+
+import models from './db';
+
 const PORT = 5678;
+const db_url = 'mongodb://192.168.1.140/ssns_lt';
+
+mongoose.connect(db_url, { useNewUrlParser: true, useUnifiedTopology: true }).then(async () => {
+});
+
+const db = mongoose.connection;
+db.on('error', error => {
+    console.log('error', error);
+});
+db.on('open', () => console.log('mongodb connection successfull!'));
 
 /*const nodes = [{
     addr: 'test:test:test:test1',
@@ -22,6 +36,8 @@ const PORT = 5678;
     temp: [{ value: 0.1, timestamp: new Date() }, { value: 0.2, timestamp: new Date() }],
     light: [{ value: 0.1, timestamp: new Date() }, { value: 0.2, timestamp: new Date() }]
 }];*/
+
+
 const nodes = [];
 
 server.on('error', (err) => {
@@ -32,6 +48,7 @@ server.on('error', (err) => {
 server.on('message', (msg, rinfo) => {
     console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
     let node = nodes.find(x => x.addr == rinfo.address);
+
     if (!node) {
         node = { addr: rinfo.address, light: [], temp: [] };
         nodes.push(node);
@@ -68,17 +85,30 @@ function sendToAllWs(payload) {
 }
 
 
-app.get('/', (req, res) => {
-    res.send(nodes)
+app.get('/', async (req, res) => {
+    const r = await models.Node.find({});
+    res.send(r);
 });
 
-app.get('/test', (req, res) => {
-    nodes[2].temp.push({ value: 'FULL', timestamp: new Date() });
-    nodes[2].light.push({ value: 'FULL', timestamp: new Date() });
-    const r = { msg: 'update', data: nodes[2] };
-    sendToAllWs(r);
+app.get('/:id', async (req, res) => {
+    const r = await models.Sensor.find({ node: { addr: req.params.id }});
+    res.send(r);
+});
+
+let i = 1;
+app.get('/test/:addr', async (req, res) => {
+    const n = await models.Node.findOne({ addr: req.params.addr });
+    const s = new models.Sensor({
+        type: 'light',
+        value: 0.12,
+        timestamp: new Date(),
+        node: n
+    });
+    s.save();
     res.send('ok');
 });
+
+
 
 function nodes_payload() {
     return {
