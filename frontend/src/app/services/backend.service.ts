@@ -1,9 +1,15 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject, ReplaySubject } from 'rxjs';
 import { webSocket } from "rxjs/webSocket";
 import { map } from 'rxjs/operators';
 import { Node } from '../models/node';
+
+const httpOptions = {
+    headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+    })
+};
 
 @Injectable({
     providedIn: 'root'
@@ -30,7 +36,7 @@ export class BackendService {
     }
 
     public updateNode(node: Node): Observable<Node> {
-        return this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node);
+        return this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node, httpOptions);
     }
 
     private handleWs(r: { msg: string, data: any }): void {

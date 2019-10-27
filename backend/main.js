@@ -5,7 +5,9 @@ var cors = require('cors')
 const app = express();
 const expressWs = require('express-ws')(app);
 const mongoose = require('mongoose');
+import bodyparser from 'body-parser';
 app.use(cors());
+app.use(bodyparser.json());
 const api_port = 3333;
 
 
@@ -22,7 +24,7 @@ const db = mongoose.connection;
 db.on('error', error => {
     console.log('error', error);
 });
-db.on('open', () => console.log('mongodb connection successfull!'));
+db.on('open', () => console.log('mongodb connected'));
 server.on('error', (err) => {
     console.log(`server error:\n${err.stack}`);
     server.close();
@@ -33,6 +35,7 @@ server.on('message', async (msg, rinfo) => {
     let node = await models.Node.findOne({ addr: rinfo.address });
     if (!node) {
         node = new models.Node({ addr: rinfo.address, timer: INIT_TIMER });
+        setNodeTimer(rinfo.address, INIT_TIMER);
     }
     const status = JSON.parse(msg);
 
@@ -48,7 +51,6 @@ server.on('message', async (msg, rinfo) => {
     node.light.push({ value: light, timestamp: new Date() });
     await node.save();
 
-    setNodeTimer(rinfo.address, INIT_TIMER);
     sendToAllWs(await generate_nodes_payload());
 });
 
@@ -88,11 +90,14 @@ app.get('/node/:id', async (req, res) => {
     res.send(node);
 });
 
-app.post('/node/:id', async(req, res) => {
+app.put('/node/:id', async(req, res) => {
     const node = await models.Node.findOne({ _id: req.params.id }, {
         light: { $slice: -15 },
         temp: { $slice: -15 }
-    }, {});
+    });
+    console.log(
+        req.body
+    );
     if (req.body.timer != node.timer) {
         setNodeTimer(node.addr, req.body.timer);
     }

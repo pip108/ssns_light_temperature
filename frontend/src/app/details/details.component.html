@@ -1,7 +1,7 @@
 <ion-header>
     <ion-toolbar>
-        <ion-title>
-            Light & Temperature Monitoring
+        <ion-title >
+            <span style="cursor: pointer;" [routerLink]="['/home']">Light & Temperature Monitoring</span>
         </ion-title>
     </ion-toolbar>
 </ion-header>
@@ -12,13 +12,13 @@
             <ion-row>
                 <ion-col size="3" offset="3">
                     <ion-item>
-                        <ion-label>Node IPv6 Address</ion-label>
+                        <ion-label position="floating">Node IPv6 Address</ion-label>
                         <ion-input [(ngModel)]="node.addr" disabled></ion-input>
                     </ion-item>
                 </ion-col>
                 <ion-col size="3">
                     <ion-item>
-                        <ion-label>Name</ion-label>
+                        <ion-label position="floating">Name</ion-label>
                         <ion-input [(ngModel)]="node.name"></ion-input>
                     </ion-item>
                 </ion-col>
@@ -26,12 +26,12 @@
             <ion-row>
                 <ion-col size="3" offset="3">
                     <ion-item>
-                        <ion-label>Timer</ion-label>
+                        <ion-label position="floating">Update frequency (seconds)</ion-label>
                         <ion-input [(ngModel)]="node.timer"></ion-input>
                     </ion-item>
                 </ion-col>
                 <ion-col size="3">
-                    <ion-button (click)="saveChanges()">Apply changes</ion-button>
+                    <ion-button float-right (click)="saveChanges()">Apply changes</ion-button>
                 </ion-col>
             </ion-row>
             <ion-row>

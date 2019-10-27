@@ -17,7 +17,7 @@
               <ion-label>
                 <h2>{{ node.name || node.addr }}</h2>
                 <h3 *ngIf="node.name">{{ node.addr }}</h3>
-
+                <h4 *ngIf="node.temp.length > 0">Last update {{ node.temp[0].timestamp | date:'medium' }}</h4>
                 <p>
                   <ion-list>
                     <ion-item>

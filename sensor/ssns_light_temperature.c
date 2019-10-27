@@ -150,7 +150,7 @@ static void udp_rx_callback(struct simple_udp_connection *c,
     uint8_t set_timer = atoi(parts[1]);
     if (set_timer > 0) {
       sensor_timer_value = set_timer;
-      printf("setting sensor timer to %u", sensor_timer_value);
+      printf("setting sensor timer to %u\n", sensor_timer_value);
       leds_on(LEDS_BLUE);
       op = true;
     }
