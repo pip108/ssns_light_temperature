@@ -10,7 +10,6 @@ import { map } from 'rxjs/operators';
 export class BackendService {
 
     private ws = webSocket('ws://localhost:3333');
-    private nodesWs = webSocket('ws://localhost:3333/nodes');
 
     private nodes: Node[] = [];
     private nodeSubject = new ReplaySubject<Node[]>();

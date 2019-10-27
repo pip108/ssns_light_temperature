@@ -45,31 +45,27 @@ server.on('error', (err) => {
     server.close();
 });
 
-server.on('message', (msg, rinfo) => {
-    console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    let node = nodes.find(x => x.addr == rinfo.address);
-
+server.on('message', async (msg, rinfo) => {
+    console.log(`server got: ${msg} from ${rinfo.address} port ${rinfo.port}`);
+    let node = await models.Node.findOne({ addr: rinfo.address });
     if (!node) {
-        node = { addr: rinfo.address, light: [], temp: [] };
-        nodes.push(node);
+        node = new models.Node({ addr: rinfo.address });
     }
     const status = JSON.parse(msg);
-    
+
     const adc_temp = status.temp * 4096 / 30000;
     const r_temp = (4095 - adc_temp) * 10 / adc_temp;
     const temp = 1 / (Math.log(r_temp / 10) / 3975 + 1 / 298.15) - 273.15;
-
 
     const adc_light = status.light * 4096 / 30000;
     const r_light = (4095 - adc_light) * 10 / adc_light;
     const light = 63 * Math.pow(r_light, -0.7);
 
-    console.log(`temp ${temp}`);
-    console.log(`light ${light}`);
-    node.temp.unshift({ value: temp, timestamp: new Date() });
-    node.light.unshift({ value: light, timestamp: new Date() });
+    node.temp.push({ value: temp, timestamp: new Date() });
+    node.light.push({ value: light, timestamp: new Date() });
+    node.save();
 
-    sendToAllWs(nodes_payload());
+    sendToAllWs(await generate_nodes_payload());
 });
 
 server.on('listening', () => {
@@ -85,51 +81,39 @@ function sendToAllWs(payload) {
 }
 
 
-app.get('/', async (req, res) => {
+app.get('/asd', async (req, res) => {
     const r = await models.Node.find({});
     res.send(r);
 });
 
-app.get('/set_timer/:t', async (req, res) => {
-    const r = await models.Node.find({});
-    server.send("set_timer " + req.params.t, 5678, "fd00::212:4b00:14b5:f41c");
-    res.send(r);
+app.get('/test', async (req, res) => {
+    const node = new models.Node({ 
+        addr: 'geh',
+        name: 'geh node',
+    });
+    node.light.push({ value: 0.12, timestamp: new Date()});
+    node.temp.push({ value: 0.12, timestamp: new Date()});
+    node.save();
 });
 
 app.post('/set_timer', async (req, res) => {
     server.send("set_timer " + req.body.timer, req.body.timer);
 });
 
-app.get('/:id', async (req, res) => {
-    const r = await models.Sensor.find({ node: { addr: req.params.id }});
-    res.send(r);
-});
 
-let i = 1;
-app.get('/test/:addr', async (req, res) => {
-    const n = await models.Node.findOne({ addr: req.params.addr });
-    const s = new models.Sensor({
-        type: 'light',
-        value: 0.12,
-        timestamp: new Date(),
-        node: n
-    });
-    s.save();
-    res.send('ok');
-});
-
-
-
-function nodes_payload() {
-    return {
+async function generate_nodes_payload() {
+    const nodes = await models.Node.find({}, { light: { $slice: -1 } }, {temp: { $slice: -1 }});
+    return JSON.stringify({
         msg: 'nodes',
         data: nodes
-    };
+    });
 }
 
-app.ws('/', function (ws, req) {
+app.ws('/', async function (ws, req) {
     console.log('Socket Connected');
-    ws.send(nodes_payload());
+    const nodes = await generate_nodes_payload();
+    ws.send(nodes);
+
 });
 
 app.listen(api_port, () => console.log(`Light & Temperature monitoring backend listening on ${api_port}!`))
