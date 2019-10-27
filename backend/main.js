@@ -90,6 +90,16 @@ app.get('/', async (req, res) => {
     res.send(r);
 });
 
+app.get('/set_timer/:t', async (req, res) => {
+    const r = await models.Node.find({});
+    server.send("set_timer " + req.params.t, 5678, "fd00::212:4b00:14b5:f41c");
+    res.send(r);
+});
+
+app.post('/set_timer', async (req, res) => {
+    server.send("set_timer " + req.body.timer, req.body.timer);
+});
+
 app.get('/:id', async (req, res) => {
     const r = await models.Sensor.find({ node: { addr: req.params.id }});
     res.send(r);
