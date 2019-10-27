@@ -11,7 +11,6 @@ import { Node } from '../models/node';
 export class BackendService {
     private ws = webSocket('ws://localhost:3333');
 
-    private nodes: Node[] = [];
     private nodeSubject = new ReplaySubject<Node[]>();
 
     constructor(private http: HttpClient) {
@@ -34,15 +33,10 @@ export class BackendService {
         console.log('hmm', r);
         switch (r.msg) {
             case 'nodes':
-                this.nodes = r.data;
-                this.nodeSubject.next(this.nodes);
+                this.nodeSubject.next(r.data);
                 break;
             case 'update':
-                console.log(r);
-                const node = r.data as Node;
-                const i = this.nodes.findIndex(x => x.addr == node.addr);
-                this.nodes[i] = node;
-                this.nodeSubject.next(this.nodes);
+                this.nodeSubject.next(r.data);
             break;
             default:
                 break;

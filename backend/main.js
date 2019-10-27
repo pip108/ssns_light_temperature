@@ -71,8 +71,8 @@ app.post('/set_timer', async (req, res) => {
 async function generate_nodes_payload() {
     const nodes = await models.Node.find({},
         {
-            light: { $slice: -5 },
-            temp: { $slice: -5 }
+            light: { $slice: -1 },
+            temp: { $slice: -1 }
         });
     return {
         msg: 'nodes',

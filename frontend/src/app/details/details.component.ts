@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { BackendService } from '../services/backend.service';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, skip } from 'rxjs/operators';
 import { Node } from '../models/node';
 
 @Component({
@@ -21,7 +21,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
-        this.updatesSubscription = this.backend.getNodeUpdates(this.node._id).subscribe(n => {
+        this.updatesSubscription = this.backend.getNodeUpdates(this.node._id).pipe(skip(1)).subscribe(n => {
             this.node.light.unshift(n.light[0]);
             this.node.temp.unshift(n.temp[0]);
         });
