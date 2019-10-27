@@ -1,3 +1,5 @@
+import { Sensor } from './sensor';
+
 export interface Node {
     _id: string;
     addr: string;
