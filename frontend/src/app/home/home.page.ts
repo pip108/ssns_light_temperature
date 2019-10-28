@@ -13,9 +13,10 @@ export class HomePage implements OnInit {
 
   public nodes$ = this.backend.getNodes();
   public sensors$ = this.backend.getLatestSensors().pipe(map(sensors => {
-    const d: { [index:string]: Sensor } = {};
-    sensors.forEach(s => d[s.node] = s);
-    console.log('what', d);
+    const d: { [key:string]: Sensor } = {};
+    sensors.forEach(s => {
+      d[s.node] = s;
+    });
     return d;
   }));
 

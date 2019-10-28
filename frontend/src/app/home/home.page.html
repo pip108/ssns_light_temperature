@@ -20,15 +20,15 @@
                 <h4 *ngIf="sensors[node._id]">Last update {{ sensors[node._id].timestamp | date:'medium' }}</h4>
               </ion-label>
               <p>
-                <ion-list>
-                  <!-- <ion-item>
+                <ion-list *ngIf="sensors[node._id]">
+                  <ion-item>
                     <ion-icon name="thermometer"></ion-icon>
-                    <span *ngIf="node.temp.length > 0"> {{ node.temp[0].value | number:'1.0-1' }} °C</span>
+                    {{ sensors[node._id].temp | number:'1.0-1' }} °C
                   </ion-item>
                   <ion-item>
                     <ion-icon name="sunny"></ion-icon>
-                    <span *ngIf="node.light.length > 0"> {{ node.light[0].value | number:'1.0-1' }} lux</span>
-                  </ion-item> -->
+                    {{ sensors[node._id].light | number:'1.0-1' }} lux
+                  </ion-item>
                 </ion-list>
               </p>
             </ion-item>

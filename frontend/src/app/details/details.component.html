@@ -31,7 +31,7 @@
                     </ion-item>
                 </ion-col>
                 <ion-col size="3">
-                    <ion-button float-right (click)="saveChanges()">Apply changes</ion-button>
+                    <ion-button class="ion-float-right" (click)="saveChanges()">Apply changes</ion-button>
                 </ion-col>
             </ion-row>
             <ion-row>
@@ -45,10 +45,10 @@
                         <ion-list-header>
                             Temperature (°C) <ion-icon name="thermometer"></ion-icon>
                         </ion-list-header>
-                        <ion-item *ngFor="let temp of node.temp">
+                        <ion-item *ngFor="let s of sensors">
                             <ion-label>
-                                <h2 style="font-weight: bold;">{{ temp.value | number:'1.0-1' }}</h2>
-                                <h3>{{ temp.timestamp | date:'medium' }}</h3>
+                                <h2 style="font-weight: bold;">{{ s.temp | number:'1.0-1' }}</h2>
+                                <h3>{{ s.timestamp | date:'medium' }}</h3>
                             </ion-label>
                         </ion-item>
                     </ion-list>
@@ -57,15 +57,21 @@
                     <ion-list>
                         <ion-list-header>Light (lux) <ion-icon name="sunny"></ion-icon>
                         </ion-list-header>
-                        <ion-item *ngFor="let light of node.light">
+                        <ion-item *ngFor="let s of sensors">
                             <ion-label>
-                                <h2 style="font-weight: bold;">{{ light.value | number:'1.0-1' }}</h2>
-                                <h3>{{ light.timestamp | date:'medium' }}</h3>
+                                <h2 style="font-weight: bold;">{{ s.light | number:'1.0-1' }}</h2>
+                                <h3>{{ s.timestamp | date:'medium' }}</h3>
                             </ion-label>
                         </ion-item>
                     </ion-list>
                 </ion-col>
             </ion-row>
+            <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" [disabled]="numTimesLeft <= 0">
+                    <ion-infinite-scroll-content
+                      loadingSpinner="bubbles"
+                      loadingText="Loading more data...">
+                    </ion-infinite-scroll-content>
+                  </ion-infinite-scroll>
         </ion-grid>
 
     </div>

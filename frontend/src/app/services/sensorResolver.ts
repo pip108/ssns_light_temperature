@@ -12,8 +12,8 @@ export class SensorResolver implements Resolve<Sensor[]> {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<any>|Promise<any>|any {
-    const s = Number.parseInt(route.paramMap.get('s')) || 0;
-    const t = Number.parseInt(route.paramMap.get('t')) || 20;
+    const s = Number.parseInt(route.queryParamMap.get('s')) || 0;
+    const t = Number.parseInt(route.queryParamMap.get('t')) || 100;
     return this.backend.getSensors(route.paramMap.get('id'), s, t);
   }
 }

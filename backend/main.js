@@ -91,10 +91,9 @@ app.get('/node/:id', async (req, res) => {
 });
 
 app.get('/sensors/:nodeId', async (req, res) => {
-    const r = {
-        light: await model.Sensor.find({ node: req.params.nodeId, type: SensorType.Light }),
-        temp: await model.Sensor.find({ node: req.params.nodeId, type: SensorType.Temp })
-    }
+    const s = parseInt(req.query.s) || 0;
+    const t = parseInt(req.query.t) || 20;
+    const r = await models.Sensor.find({ node: req.params.nodeId }).skip(s).limit(t);
     res.send(r);
 });
 
@@ -116,7 +115,9 @@ app.ws('/', async function (ws, req) {
     const sensors = [];
     for (let i = 0; i < nodes.length; i++) {
         const s = await models.Sensor.find({ node: nodes[i]._id }).sort({ 'timestamp': -1 }).limit(1);
-        sensors.push(s);
+        if (s.length > 0) {
+            sensors.push(s[0]);
+        }
     }
     const payload = {
         msg: 'init',
