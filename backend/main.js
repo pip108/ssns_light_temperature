@@ -11,24 +11,12 @@ app.use(bodyparser.json());
 const api_port = 3333;
 
 
-import models from './db';
+import { models, connectDb, SensorType } from './db';
 
 const PORT = 5678;
 const INIT_TIMER = 5;
-const db_url = 'mongodb://192.168.1.140/ssns_lt';
 
-mongoose.connect(db_url, { useNewUrlParser: true, useUnifiedTopology: true }).then(async () => {
-});
-
-const db = mongoose.connection;
-db.on('error', error => {
-    console.log('error', error);
-});
-db.on('open', () => console.log('mongodb connected'));
-server.on('error', (err) => {
-    console.log(`server error:\n${err.stack}`);
-    server.close();
-});
+connectDb();
 
 server.on('message', async (msg, rinfo) => {
     console.log(`${msg} from ${rinfo.address} port ${rinfo.port}`);
@@ -40,14 +28,19 @@ server.on('message', async (msg, rinfo) => {
     switch (payload.msg) {
         case 'update':
             handleUpdate(node, payload.data);
-        break;
+            break;
         case 't_req':
             setNodeTimer(rinfo.address, node.timer);
-        break;
+            break;
         default:
-        break;
+            break;
     }
     await node.save();
+});
+
+server.on('error', (err) => {
+    console.log(`server error:\n${err.stack}`);
+    server.close();
 });
 
 
@@ -60,10 +53,17 @@ async function handleUpdate(node, update) {
     const r_light = (4095 - adc_light) * 10 / adc_light;
     const light = 63 * Math.pow(r_light, -0.7);
 
-    node.temp.push({ value: temp, timestamp: new Date() });
-    node.light.push({ value: light, timestamp: new Date() });
+    const update_light =
+        new models.Sensor({ node: node._id, type: SensorType.Light, value: light, timestamp: new Date() });
+    const update_temp =
+        new models.Sensor({ node: node._id, type: SensorType.Light, value: light, timestamp: new Date() });
 
-    const update_payload =  {
+    await Promise.all(update_light, update_temp);
+
+    node.light = [update_light];
+    node.temp = [update_temp];
+
+    const update_payload = {
         msg: 'update',
         data: node
     };
@@ -87,11 +87,16 @@ function sendToAllWs(payload) {
 }
 
 async function generate_nodes_payload() {
-    const nodes = await models.Node.find({},
-        {
-            light: { $slice: -1 },
-            temp: { $slice: -1 }
-        });
+    const nodes = await models.Node.find({});
+    nodes.forEach(async n => {
+        n.light = await models.Sensor.find({ node: n._id, type: SensorType.Light })
+            .sort({ timestamp: -1 })
+            .take(1);
+        n.temp = await models.Sensor.find({ node: n._id, type: SensorType.Temp })
+            .sort({ timestamp: -1 })
+            .take(1);
+    });
+
     return {
         msg: 'nodes',
         data: nodes
@@ -99,18 +104,24 @@ async function generate_nodes_payload() {
 }
 
 app.get('/node/:id', async (req, res) => {
-    const node = await models.Node.findOne({ _id: req.params.id }, {
-        light: { $slice: -15 },
-        temp: { $slice: -15 }
-    }).sort({ 'temp.timestamp': -1});
+    const node = await models.Node.findOne({ _id: req.params.id });
+    node.light = await models.Sensor.find({ node: n._id, type: SensorType.Light })
+        .sort({ timestamp: -1 })
+        .take(15);
+    node.temp = await models.Sensor.find({ node: n._id, type: SensorType.Temp })
+        .sort({ timestamp: -1 })
+        .take(15);
     res.send(node);
 });
 
-app.put('/node/:id', async(req, res) => {
-    const node = await models.Node.findOne({ _id: req.params.id }, {
-        light: { $slice: -15 },
-        temp: { $slice: -15 }
-    });
+app.put('/node/:id', async (req, res) => {
+    const node = await models.Node.findOne({ _id: req.params.id });
+    node.light = await models.Sensor.find({ node: n._id, type: SensorType.Light })
+        .sort({ timestamp: -1 })
+        .take(15);
+    node.temp = await models.Sensor.find({ node: n._id, type: SensorType.Temp })
+        .sort({ timestamp: -1 })
+        .take(15);
     if (req.body.timer != node.timer) {
         setNodeTimer(node.addr, req.body.timer);
     }
