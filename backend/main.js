@@ -19,6 +19,16 @@ const INIT_TIMER = 5;
 
 connectDb();
 
+server.on('error', (err) => {
+    console.log(`server error:\n${err.stack}`);
+    server.close();
+});
+
+server.on('listening', () => {
+    const address = server.address();
+    console.log(`server listening ${address.address}:${address.port}`);
+});
+
 server.on('message', async (msg, rinfo) => {
     console.log(`${msg} from ${rinfo.address} port ${rinfo.port}`);
     let node = await models.Node.findOne({ addr: rinfo.address });
@@ -39,11 +49,7 @@ server.on('message', async (msg, rinfo) => {
     await node.save();
 });
 
-server.on('error', (err) => {
-    console.log(`server error:\n${err.stack}`);
-    server.close();
-});
-
+server.bind(PORT);
 
 async function handleUpdate(node, update) {
     const adc_temp = update.temp * 4096 / 30000;
@@ -66,23 +72,13 @@ async function handleUpdate(node, update) {
         msg: 'update',
         data: newValue
     };
-    sendToAllWs(JSON.stringify(update_payload));
+
+    const clients = expressWs.getWss('/').clients;
+    clients.forEach(client => client.send(JSON.stringify(update_payload)));
 }
 
 function setNodeTimer(addr, value) {
     server.send('set_timer ' + value, PORT, addr);
-}
-
-server.on('listening', () => {
-    const address = server.address();
-    console.log(`server listening ${address.address}:${address.port}`);
-});
-
-server.bind(PORT);
-
-function sendToAllWs(payload) {
-    const clients = expressWs.getWss('/').clients;
-    clients.forEach(client => client.send(JSON.stringify(payload)));
 }
 
 app.get('/node/:id', async (req, res) => {
@@ -93,7 +89,7 @@ app.get('/node/:id', async (req, res) => {
 app.get('/sensors/:nodeId', async (req, res) => {
     const s = parseInt(req.query.s) || 0;
     const t = parseInt(req.query.t) || 20;
-    const r = await models.Sensor.find({ node: req.params.nodeId }).skip(s).limit(t);
+    const r = await models.Sensor.find({ node: req.params.nodeId }).sort({ timestamp: - 1}).skip(s).limit(t);
     res.send(r);
 });
 

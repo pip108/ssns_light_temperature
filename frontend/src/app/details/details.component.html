@@ -47,7 +47,7 @@
                         </ion-list-header>
                         <ion-item *ngFor="let s of sensors">
                             <ion-label>
-                                <h2 style="font-weight: bold;">{{ s.temp | number:'1.0-1' }}</h2>
+                                <h2 style="font-weight: bold;">{{ s.temp | number:'1.1-1' }}</h2>
                                 <h3>{{ s.timestamp | date:'medium' }}</h3>
                             </ion-label>
                         </ion-item>
@@ -59,14 +59,14 @@
                         </ion-list-header>
                         <ion-item *ngFor="let s of sensors">
                             <ion-label>
-                                <h2 style="font-weight: bold;">{{ s.light | number:'1.0-1' }}</h2>
+                                <h2 style="font-weight: bold;">{{ s.light | number:'1.1-1' }}</h2>
                                 <h3>{{ s.timestamp | date:'medium' }}</h3>
                             </ion-label>
                         </ion-item>
                     </ion-list>
                 </ion-col>
             </ion-row>
-            <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" [disabled]="numTimesLeft <= 0">
+            <ion-infinite-scroll threshold="300px" (ionInfinite)="loadData($event)" [disabled]="numTimesLeft <= 0">
                     <ion-infinite-scroll-content
                       loadingSpinner="bubbles"
                       loadingText="Loading more data...">

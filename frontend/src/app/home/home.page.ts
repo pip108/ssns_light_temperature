@@ -23,6 +23,7 @@ export class HomePage implements OnInit {
   constructor(private backend: BackendService, private router: Router) {}
 
   public ngOnInit(): void {
+    this.sensors$.subscribe(s => console.log('updates', s));
   }
 
 

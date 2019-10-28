@@ -51,7 +51,6 @@ export class BackendService {
     }
 
     private handleWs(r: { msg: string, data: any }): void {
-        console.log('hmm', r);
         switch (r.msg) {
             case 'init':
                 this.nodes = r.data.nodes;
@@ -63,6 +62,7 @@ export class BackendService {
                 const i = this.latestSensors.findIndex(x => x.node === r.data.node);
                 this.latestSensors.splice(i, 1);
                 this.latestSensors.push(r.data);
+                this.latestSensorsSubject.next(this.latestSensors);
                 break;
             default:
                 break;
