@@ -2,10 +2,10 @@
 import mongoose from 'mongoose';
 
 const sensorSchema = new mongoose.Schema({
-    type: {
+    light: {
         type: Number
     },
-    value: {
+    temp: {
         type: Number
     },
     timestamp: {

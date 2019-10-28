@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { NodeResolver } from './services/nodeResolver';
+import { SensorResolver } from './services/sensorResolver';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -8,7 +9,8 @@ const routes: Routes = [
   { path: 'node/:id', 
     loadChildren: () => import('./details/details.module').then( m => m.HomePageModule),
     resolve: {
-      node: NodeResolver
+      node: NodeResolver,
+      sensors: SensorResolver
     }
   },
 ];

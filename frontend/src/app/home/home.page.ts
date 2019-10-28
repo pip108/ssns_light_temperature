@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../services/backend.service';
-import { take } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { ModalController } from '@ionic/angular';
-import { DetailsComponent } from '../details/details.component';
 import { Router } from '@angular/router';
+import { switchMap, map } from 'rxjs/operators';
+import { Sensor } from '../models/sensor';
 
 @Component({
   selector: 'app-home',
@@ -15,13 +12,18 @@ import { Router } from '@angular/router';
 export class HomePage implements OnInit {
 
   public nodes$ = this.backend.getNodes();
+  public sensors$ = this.backend.getLatestSensors().pipe(map(sensors => {
+    const d: { [index:string]: Sensor } = {};
+    sensors.forEach(s => d[s.node] = s);
+    console.log('what', d);
+    return d;
+  }));
 
-  constructor(private backend: BackendService, private modalController: ModalController, private router: Router) {}
+  constructor(private backend: BackendService, private router: Router) {}
 
   public ngOnInit(): void {
-    
-    this.nodes$.subscribe(nodes => console.log('nodes', nodes), error => console.log('error', error));
   }
+
 
   public async showDetails(i: number) {
     this.router.navigate(['node', { i: i }]);

@@ -9,7 +9,7 @@
 <ion-content>
   <div class="ion-padding">
     <ion-grid *ngIf="nodes$ | async as nodes">
-      <ion-row>
+      <ion-row *ngIf="sensors$ | async as sensors">
         <ion-col size="6" offset="3">
           <ion-list>
             <ion-item class="node-item" *ngFor="let node of nodes" button [routerLink]="['/node', node._id]">
@@ -17,18 +17,18 @@
               <ion-label>
                 <h2>{{ node.name || node.addr }}</h2>
                 <h3>{{ node.addr }}</h3>
-                <h4 *ngIf="node.temp.length > 0">Last update {{ node.temp[0].timestamp | date:'medium' }}</h4>
+                <h4 *ngIf="sensors[node._id]">Last update {{ sensors[node._id].timestamp | date:'medium' }}</h4>
               </ion-label>
               <p>
                 <ion-list>
-                  <ion-item>
+                  <!-- <ion-item>
                     <ion-icon name="thermometer"></ion-icon>
                     <span *ngIf="node.temp.length > 0"> {{ node.temp[0].value | number:'1.0-1' }} °C</span>
                   </ion-item>
                   <ion-item>
                     <ion-icon name="sunny"></ion-icon>
                     <span *ngIf="node.light.length > 0"> {{ node.light[0].value | number:'1.0-1' }} lux</span>
-                  </ion-item>
+                  </ion-item> -->
                 </ion-list>
               </p>
             </ion-item>

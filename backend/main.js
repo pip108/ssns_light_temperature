@@ -12,6 +12,7 @@ const api_port = 3333;
 
 
 import { models, connectDb, SensorType } from './db';
+import { model } from 'mongoose';
 
 const PORT = 5678;
 const INIT_TIMER = 5;
@@ -53,19 +54,17 @@ async function handleUpdate(node, update) {
     const r_light = (4095 - adc_light) * 10 / adc_light;
     const light = 63 * Math.pow(r_light, -0.7);
 
-    const update_light =
-        new models.Sensor({ node: node._id, type: SensorType.Light, value: light, timestamp: new Date() });
-    const update_temp =
-        new models.Sensor({ node: node._id, type: SensorType.Light, value: light, timestamp: new Date() });
-
-    await Promise.all([update_light.save(), update_temp.save()]);
-
-    node.light = [update_light];
-    node.temp = [update_temp];
+    const newValue = new models.Sensor({
+        light: light,
+        temp: temp,
+        timestamp: new Date(),
+        node: node._id
+    });
+    await newValue.save();
 
     const update_payload = {
         msg: 'update',
-        data: node
+        data: newValue
     };
     sendToAllWs(JSON.stringify(update_payload));
 }
@@ -86,17 +85,17 @@ function sendToAllWs(payload) {
     clients.forEach(client => client.send(JSON.stringify(payload)));
 }
 
-async function generate_nodes_payload() {
-    const nodes = await models.Node.find({});
-    return {
-        msg: 'nodes',
-        data: nodes
-    };
-}
-
 app.get('/node/:id', async (req, res) => {
     const node = await models.Node.findOne({ _id: req.params.id });
     res.send(node);
+});
+
+app.get('/sensors/:nodeId', async (req, res) => {
+    const r = {
+        light: await model.Sensor.find({ node: req.params.nodeId, type: SensorType.Light }),
+        temp: await model.Sensor.find({ node: req.params.nodeId, type: SensorType.Temp })
+    }
+    res.send(r);
 });
 
 app.put('/node/:id', async (req, res) => {
@@ -113,8 +112,20 @@ app.put('/node/:id', async (req, res) => {
 
 app.ws('/', async function (ws, req) {
     console.log('Socket Connected');
-    const nodes = JSON.stringify(await generate_nodes_payload());
-    ws.send(nodes);
+    const nodes = await models.Node.find({});
+    const sensors = [];
+    for (let i = 0; i < nodes.length; i++) {
+        const s = await models.Sensor.find({ node: nodes[i]._id }).sort({ 'timestamp': -1 }).limit(1);
+        sensors.push(s);
+    }
+    const payload = {
+        msg: 'init',
+        data: {
+            nodes: nodes,
+            sensors: sensors
+        }
+    };
+    ws.send(JSON.stringify(payload));
 });
 
 app.listen(api_port, () => console.log(`Light & Temperature monitoring backend listening on ${api_port}!`))
