@@ -36,11 +36,10 @@ export class BackendService {
         return this.http.get<Node>(`http://localhost:3333/node/${id}`);
     }
 
-    public async updateNode(node: Node) {
-        const n = await this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node, httpOptions)
-            .toPromise();
-
+    public async updateNode(node: Node): Promise<Node> {
+        const n = await this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node, httpOptions).toPromise();
         this.updateSingle(n);
+        return n;
     }
 
     private updateSingle(update: Node) {
@@ -54,6 +53,7 @@ export class BackendService {
     }
 
     private handleWs(r: { msg: string, data: any }): void {
+        console.log('hmm', r);
         switch (r.msg) {
             case 'nodes':
                 this.nodes = r.data;

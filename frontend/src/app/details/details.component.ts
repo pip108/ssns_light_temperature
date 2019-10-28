@@ -34,6 +34,6 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
 
     public async saveChanges() {
-        this.node = await this.backend.updateNode(this.node).toPromise();;
+        this.node = await this.backend.updateNode(this.node);
     }
 }

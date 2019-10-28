@@ -110,7 +110,7 @@ PROCESS_THREAD(udp_server_process, ev, data)
   //uip_ip6addr(&server_ipaddr, 0xfe80, 0xbe57, 0xe7b2, 0, 0, 0, 0xa3ef, 0x2399);
 
   // request possible saved ctimer value
-  sendToServer("{\"msg\":\"t_req\"}")
+  sendToServer("{\"msg\":\"t_req\"}");
   ctimer_set(&sensor_timer, CLOCK_SECOND * sensor_timer_value, sensor_timer_callback, NULL);
 
   while (1)
