@@ -58,7 +58,7 @@ async function handleUpdate(node, update) {
     const update_temp =
         new models.Sensor({ node: node._id, type: SensorType.Light, value: light, timestamp: new Date() });
 
-    await Promise.all(update_light, update_temp);
+    await Promise.all([update_light.save(), update_temp.save()]);
 
     node.light = [update_light];
     node.temp = [update_temp];
@@ -88,15 +88,6 @@ function sendToAllWs(payload) {
 
 async function generate_nodes_payload() {
     const nodes = await models.Node.find({});
-    nodes.forEach(async n => {
-        n.light = await models.Sensor.find({ node: n._id, type: SensorType.Light })
-            .sort({ timestamp: -1 })
-            .take(1);
-        n.temp = await models.Sensor.find({ node: n._id, type: SensorType.Temp })
-            .sort({ timestamp: -1 })
-            .take(1);
-    });
-
     return {
         msg: 'nodes',
         data: nodes
@@ -105,23 +96,11 @@ async function generate_nodes_payload() {
 
 app.get('/node/:id', async (req, res) => {
     const node = await models.Node.findOne({ _id: req.params.id });
-    node.light = await models.Sensor.find({ node: n._id, type: SensorType.Light })
-        .sort({ timestamp: -1 })
-        .take(15);
-    node.temp = await models.Sensor.find({ node: n._id, type: SensorType.Temp })
-        .sort({ timestamp: -1 })
-        .take(15);
     res.send(node);
 });
 
 app.put('/node/:id', async (req, res) => {
     const node = await models.Node.findOne({ _id: req.params.id });
-    node.light = await models.Sensor.find({ node: n._id, type: SensorType.Light })
-        .sort({ timestamp: -1 })
-        .take(15);
-    node.temp = await models.Sensor.find({ node: n._id, type: SensorType.Temp })
-        .sort({ timestamp: -1 })
-        .take(15);
     if (req.body.timer != node.timer) {
         setNodeTimer(node.addr, req.body.timer);
     }

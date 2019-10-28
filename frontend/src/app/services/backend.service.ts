@@ -36,14 +36,15 @@ export class BackendService {
         return this.http.get<Node>(`http://localhost:3333/node/${id}`);
     }
 
-    public async updateNode(node: Node) {
+    public async updateNode(node: Node): Promise<Node> {
         const n = await this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node, httpOptions)
             .toPromise();
 
         this.updateSingle(n);
+        return n;
     }
 
-    private updateSingle(update: Node) {
+    private updateSingle(update: Node): void {
         const i = this.nodes.findIndex(x => x.addr == update.addr);
         if (i > 0) {
             this.nodes[i] = update;
