@@ -1,0 +1,22 @@
+{
+  "name": "ssns_light_temperature",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently --kill-others \"npm start --prefix backend\" \"npm start --prefix frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pip108/ssns_light_temperature.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pip108/ssns_light_temperature/issues"
+  },
+  "homepage": "https://github.com/pip108/ssns_light_temperature#readme",
+  "devDependencies": {
+    "concurrently": "^5.0.0"
+  }
+}

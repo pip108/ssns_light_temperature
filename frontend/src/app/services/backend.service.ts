@@ -18,9 +18,10 @@ export class BackendService {
     private ws = webSocket('ws://localhost:3333');
 
     private nodeSubject = new ReplaySubject<Node[]>();
+    private nodes: Node[] = [];
 
     constructor(private http: HttpClient) {
-        this.ws.subscribe((r: {msg: string, data: any}) => this.handleWs(r));
+        this.ws.subscribe((r: { msg: string, data: any }) => this.handleWs(r));
     }
 
     public getNodes(): Observable<Node[]> {
@@ -35,19 +36,32 @@ export class BackendService {
         return this.http.get<Node>(`http://localhost:3333/node/${id}`);
     }
 
-    public updateNode(node: Node): Observable<Node> {
-        return this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node, httpOptions);
+    public async updateNode(node: Node) {
+        const n = await this.http.put<Node>(`http://localhost:3333/node/${node._id}`, node, httpOptions)
+            .toPromise();
+
+        this.updateSingle(n);
+    }
+
+    private updateSingle(update: Node) {
+        const i = this.nodes.findIndex(x => x.addr == update.addr);
+        if (i > 0) {
+            this.nodes[i] = update;
+            this.nodeSubject.next(this.nodes);
+        } else {
+            this.nodes.push(update);
+        }
     }
 
     private handleWs(r: { msg: string, data: any }): void {
-        console.log('hmm', r);
         switch (r.msg) {
             case 'nodes':
-                this.nodeSubject.next(r.data);
+                this.nodes = r.data;
+                this.nodeSubject.next(this.nodes);
                 break;
             case 'update':
-                this.nodeSubject.next(r.data);
-            break;
+                this.updateSingle(r.data);
+                break;
             default:
                 break;
         }
